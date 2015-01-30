@@ -31,6 +31,7 @@ from config_check import check_arg
 from webapp_mgmt import webapp_general_process,database_general_process
 from network_mgmt import NetworkM
 from plugin.auth_backend import AuthBackend
+from template_mgmt import ops_manager_process
 
 main_app=bottle.Bottle()
 
@@ -592,8 +593,21 @@ def devices_delete(device_id, path):
 @main_app.route('/database/<path:path>', method='DELETE')
 @myauth_basic(g_aaa.AUTH_USER)
 def database_get(path):
-    prefix,dbpath=request.url.split('/database/')
-    ret = database_general_process(dbpath, request.method, request.body.read(request.MEMFILE_MAX))
+    myurl = request.url
+    prefix,dbpath=myurl.split('/database/')
+    mybody=request.body
+    ret = database_general_process(dbpath, request.method, mybody.read(request.MEMFILE_MAX))
+    return ret
+
+@main_app.route('/manager/<path:path>', method='GET')
+@main_app.route('/manager/<path:path>', method='PUT')
+@main_app.route('/manager/<path:path>', method='POST')
+@main_app.route('/manager/<path:path>', method='DELETE')
+@myauth_basic(g_aaa.AUTH_USER)
+def opsmanager_Proc(path):
+    myurl = request.url
+    mybody=request.body
+    ret = ops_manager_process(path, request.method, mybody.read(request.MEMFILE_MAX))
     return ret
 
 @main_app.route('/<path:path>', method='GET')
